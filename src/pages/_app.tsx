@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import "@assets/global.css";
-import "../mocks";
-import { CoreProvider } from "@shared/context";
-import { createAxios } from "@shared/helpers";
+import { useEventBus } from "@shared/hooks";
+import { CoreProvider } from "@shared/store";
 import {
+  DefaultOptions,
   HydrationBoundary,
   QueryClient,
   QueryClientProvider,
@@ -11,11 +11,9 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { NextPage } from "next";
 import type { AppProps } from "next/app";
-import React, { ReactElement, ReactNode } from "react";
-import { apiEndpoint } from "../config/api";
+import React, { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
-
-const http = createAxios(apiEndpoint);
+import { initMocks } from "../mocks";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -29,18 +27,36 @@ const errorHandler = (error: Error) => {
   toast.error(error.message);
 };
 
+const queryOptions: DefaultOptions = {
+  queries: {
+    refetchOnWindowFocus: false,
+  },
+};
+
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
-  const [queryClient] = React.useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: queryOptions,
+      })
+  );
   const getLayout = Component.getLayout ?? ((page) => page);
 
-  return (
+  const { isReady } = useEventBus();
+
+  const [isMockEnabled] = useState(() => {
+    initMocks();
+    return true;
+  });
+
+  return isReady && isMockEnabled ? (
     <QueryClientProvider client={queryClient}>
-      <CoreProvider http={http} defaultErrorHandler={errorHandler}>
+      <CoreProvider defaultErrorHandler={errorHandler}>
         <HydrationBoundary state={pageProps.dehydratedState}>
           {getLayout(<Component {...pageProps} />)}
         </HydrationBoundary>
         <ReactQueryDevtools />
       </CoreProvider>
     </QueryClientProvider>
-  );
+  ) : null;
 }

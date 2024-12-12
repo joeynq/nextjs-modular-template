@@ -1,14 +1,26 @@
+import { Layout } from "@mod/core/components";
+import { Logs } from "@mod/logger/components";
 import { AddTodo, TodoList } from "@mod/todo/components";
-import { Layout } from "@shared/components";
+import Head from "next/head";
 import { ReactElement } from "react";
 import type { NextPageWithLayout } from "./_app";
 
 const HomePage: NextPageWithLayout = () => {
   return (
-    <div className="max-w-lg mx-auto p-8 flex flex-col gap-8">
-      <AddTodo />
-      <TodoList />
-    </div>
+    <>
+      <Head>
+        <title>Todo App</title>
+      </Head>
+      <div className="grid grid-cols-2 h-full gap-8">
+        <div className="flex flex-col h-full">
+          <AddTodo />
+          <TodoList />
+        </div>
+        <div className="bg-slate-100 rounded-lg p-4 text-sm flex flex-col h-full">
+          <Logs />
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -1,12 +1,15 @@
-import { Button, DatePicker, Input } from "@shared/components/ui";
 import {
+  Button,
+  DatePicker,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@shared/components/ui/form";
+  Input,
+} from "@shared/components/ui";
 import { Creation } from "@shared/types";
+import { ArrowRightIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Todo } from "../domain";
 import { useAddTodo } from "../use-cases";
@@ -21,12 +24,17 @@ export const AddTodo = () => {
   const addTodo = useAddTodo();
 
   const handlerAddTodo = (data: Creation<Todo>) => {
-    addTodo(data);
+    addTodo(data).then(() => {
+      form.reset();
+    });
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handlerAddTodo)} className="flex gap-4">
+      <form
+        onSubmit={form.handleSubmit(handlerAddTodo)}
+        className="flex gap-4 items-center border-y py-4"
+      >
         <FormItem className="grow">
           <FormControl>
             <Input
@@ -54,7 +62,9 @@ export const AddTodo = () => {
             </FormItem>
           )}
         />
-        <Button type="submit">Add</Button>
+        <Button type="submit" size="icon">
+          <ArrowRightIcon />
+        </Button>
       </form>
     </Form>
   );

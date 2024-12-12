@@ -1,4 +1,5 @@
 import { Creation } from "@shared/types";
+import { GetTodoDto } from "./get-todo.dto";
 import { Todo } from "./todo.entity";
 import { TodoRepository } from "./todo.repository";
 
@@ -22,8 +23,8 @@ export class TodoService {
     return this.todoRepository.update(id, { completed: true });
   }
 
-  async getAll(): Promise<Todo[]> {
-    return this.todoRepository.getAll();
+  async getAll(dto?: GetTodoDto): Promise<Todo[]> {
+    return this.todoRepository.getAll(dto);
   }
 
   async getIncomplete(): Promise<Todo[]> {
@@ -35,6 +36,6 @@ export class TodoService {
     if (!todo) {
       throw new Error("Todo not found");
     }
-    return this.todoRepository.delete(id);
+    return this.todoRepository.remove(id);
   }
 }

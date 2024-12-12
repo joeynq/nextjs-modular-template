@@ -7,5 +7,5 @@ export interface TodoRepository {
   getAll(dto?: GetTodoDto): Promise<Todo[]>;
   update(id: string, todo: Updating<Todo>): Promise<Todo>;
   getById(id: string): Promise<Todo | null>;
-  delete(id: string): Promise<void>;
+  remove(id: string): Promise<void>;
 }

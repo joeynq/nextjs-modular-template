@@ -1,4 +1,9 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a starter template for [Next.js](https://nextjs.org) with modular structure and strict dependencies.
+
+## Features
+
+- NestJS-like Modular structure
+- Strict dependencies
 
 ## Getting Started
 
@@ -6,31 +11,115 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Module dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```mermaid
+stateDiagram-v2
+    @mod/log --> @shared: depends on
+    @mod/todo --> @shared: depends on
+    @mod/* --> @shared: depends on
+    @page --> @mod/*: render
+    @page --> @mod/log: render
+    @page --> @mod/todo: render
+    @page --> @shared: use/render
+    @shared --> @config: use
+    @page/_app.tsx --> @shared: use
+```
 
-## Learn More
+## Folder structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+public/       # static files which serve by public url
+src/
+├── assets/   # satic files which directly import in code
+├── config/   # config, constants, environment variables...
+├── modules/  # app logic separated by modules
+│             # each module is a boundary context
+├── pages/    # next.js file-based routing system
+└── shared/   # shared code which used across modules
+              # 1. shared components, lib, hooks...
+              # 2. shared state: redux, zustand, context...
+              # 3. infrastructure implementation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Module structure
 
-## Deploy on Vercel
+```
+src/mods/todo
+├── components		# React component which only for Todo use cases
+│   ├── AddTodoForm.tsx
+│   ├── TodoList.tsx
+│   ├── TodoItem.tsx
+│   └── (...)
+├── domain			# Define interface/services of Todo business logic
+│   ├── dto
+│   │   ├── todo.entity.ts
+│   │   ├── search-todos.payload.ts
+│   │   ├── create-todo.payload.ts
+│   │   └── update-todo.payload.ts
+│   ├── todo.repository.ts
+│   └── todo.service.ts
+├── impl			# implementation of repository, use adapter pattern
+│	│				# can extends usage to: axios, socket.io, graphql...
+│   └── todo.repository.impl.ts 
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Other configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`tsconfig.json`
+```jsonc
+{
+  "compilerOptions": {
+    // other config
+    "paths": {
+      "@mod/*": ["./src/modules/*"],
+      "@page/*": ["./src/pages/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@config/*": ["./src/config/*"],
+    }
+  }
+}
+```
+
+Strictly import using `eslint-plugin-strict-dependencies`
+
+`.eslintrc`
+```jsonc
+{
+  // ...other config
+  "plugins": ["strict-dependencies"],
+  "rules": {
+    // ...other rules
+    "strict-dependencies/strict-dependencies": [
+      "error",
+      [
+        {
+          "module": "@config",
+          "allowReferenceFrom": ["src/shared"],
+          "allowSameModule": true
+        },
+        {
+          "module": "@shared",
+          "allowReferenceFrom": ["src/modules", "src/pages", "src/shared"],
+          "allowSameModule": true
+        },
+        {
+          "module": "@mod",
+          "allowReferenceFrom": ["src/pages"]
+        },
+        {
+          "module": "@page",
+          "allowReferenceFrom": [],
+          "allowSameModule": true
+        }
+      ]
+    ]
+  }
+}
+```

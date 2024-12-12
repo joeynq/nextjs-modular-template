@@ -1,11 +1,37 @@
-export class LocalStorage<Data extends { id: string }> {
-  constructor(private key: string) {}
+import { symbolToString } from "./symbol";
+
+export class LocalStorage<Data> {
+  get stringKey() {
+    return symbolToString(this.key);
+  }
+
+  constructor(public key: string | symbol) {}
+
+  set(value: Data): void {
+    localStorage.setItem(this.stringKey, JSON.stringify(value));
+  }
+  get(): Data {
+    const value = localStorage.getItem(this.stringKey);
+    return value ? JSON.parse(value) : null;
+  }
+  clear() {
+    localStorage.removeItem(this.stringKey);
+  }
+}
+
+export class ListLocalStorage<Data extends { id: string }> extends LocalStorage<
+  Data[]
+> {
+  constructor(public key: string | symbol) {
+    super(key);
+  }
 
   set(value: Data[]) {
-    localStorage.setItem(this.key, JSON.stringify(value));
+    localStorage.setItem(this.stringKey, JSON.stringify(value));
   }
+
   get(predicate?: (item: Data) => boolean): Data[] {
-    const value = localStorage.getItem(this.key);
+    const value = localStorage.getItem(this.stringKey);
     if (!value) {
       return [];
     }
@@ -42,5 +68,9 @@ export class LocalStorage<Data extends { id: string }> {
 
     value[index] = { ...value[index], ...data };
     this.set(value);
+  }
+
+  count() {
+    return this.get().length;
   }
 }

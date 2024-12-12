@@ -1,3 +1,30 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "plugins": ["strict-dependencies"],
+  "rules": {
+    "strict-dependencies/strict-dependencies": [
+      "error",
+      [
+        {
+          "module": "@config",
+          "allowReferenceFrom": ["src/shared"],
+          "allowSameModule": true
+        },
+        {
+          "module": "@shared",
+          "allowReferenceFrom": ["src/modules", "src/pages", "src/shared"],
+          "allowSameModule": true
+        },
+        {
+          "module": "@mod",
+          "allowReferenceFrom": ["src/pages"]
+        },
+        {
+          "module": "@page",
+          "allowReferenceFrom": [],
+          "allowSameModule": true
+        }
+      ]
+    ]
+  }
 }

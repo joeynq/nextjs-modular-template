@@ -1,18 +1,18 @@
+import { apiEndpoint } from "@config/api.conf";
 import { faker } from "@faker-js/faker";
 import { Todo } from "@mod/todo/domain";
-import { LocalStorage } from "@shared/lib/local-storage";
+import { ListLocalStorage } from "@shared/lib/local-storage";
 import { Creation, Updating } from "@shared/types";
 import { http, HttpResponse } from "msw";
-import { apiEndpoint } from "../config/api";
 
 const endpoint = (path: string) => `${apiEndpoint}${path}`;
 
-const db = new LocalStorage<Todo>("todos");
+const db = new ListLocalStorage<Todo>("todos");
 
 export const handlers = [
   http.get(endpoint("/todos"), () => {
     const result = db.get();
-    result.sort((a, b) => a.createdAt > b.createdAt ? -1 : 1);
+    result.sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1));
     return HttpResponse.json(result);
   }),
   http.get<{ id: string }>(endpoint("/todos/:id"), ({ params }) => {

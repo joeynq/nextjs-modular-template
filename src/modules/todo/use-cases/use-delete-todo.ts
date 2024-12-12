@@ -1,5 +1,5 @@
-import { useCustomMutation } from "@shared/hooks/use-custom-mutation";
-import { useTodoService } from "../impl";
+import { useCustomMutation } from "@shared/hooks";
+import { useTodoService } from "../hooks";
 
 export const useDeleteTodo = () => {
   const service = useTodoService();
